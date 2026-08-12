@@ -3,6 +3,7 @@
     "description": "Laravel integration for the Shiprocket PHP SDK (tims/shiprocket-php-sdk)",
     "type": "library",
     "license": "MIT",
+    "homepage": "https://github.com/timslabs/laravel-shiprocket",
     "keywords": [
         "laravel",
         "shiprocket",
@@ -17,15 +18,10 @@
             "homepage": "https://github.com/timslabs"
         }
     ],
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../shiprocket-php-sdk",
-            "options": {
-                "symlink": true
-            }
-        }
-    ],
+    "support": {
+        "issues": "https://github.com/timslabs/laravel-shiprocket/issues",
+        "source": "https://github.com/timslabs/laravel-shiprocket"
+    },
     "require": {
         "php": "^8.3",
         "guzzlehttp/guzzle": "^7.9",
