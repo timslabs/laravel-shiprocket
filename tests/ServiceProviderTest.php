@@ -39,6 +39,7 @@ class ServiceProviderTest extends TestCase
     public function test_merges_package_config(): void
     {
         $this->assertSame('api@example.com', config('shiprocket.email'));
+        $this->assertSame('default', config('shiprocket.default_credentials'));
         $this->assertTrue(config('shiprocket.token_cache.enabled'));
         $this->assertTrue(config('shiprocket.retry.enabled'));
         $this->assertSame(864000, config('shiprocket.token_cache.default_ttl_seconds'));

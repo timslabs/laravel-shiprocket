@@ -33,7 +33,7 @@ class AccessTokenService
     {
         if ($email === '' || $password === '') {
             throw new InvalidArgumentException(
-                'Shiprocket requires SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD.'
+                'Shiprocket requires API credentials. Set SHIPROCKET_EMAIL / SHIPROCKET_PASSWORD or config shiprocket.credentials.'
             );
         }
 

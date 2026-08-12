@@ -6,18 +6,24 @@ Laravel integration for the Shiprocket PHP SDK ([`tims/shiprocket-php-sdk`](http
 
 `tims/shiprocket-php-sdk` is the API client (PHP **8.0+**). This package adds the Laravel layer around it:
 
-- Config and environment-based API user credentials
+- Config and environment-based API user credentials (including **multi-account**)
 - JWT access-token caching via Laravel Cache (tokens last ~10 days)
 - HTTP retries for 429 and transient 5xx responses
-- Service-container bindings and a `Shiprocket` facade
+- Service-container bindings and a `Shiprocket` facade with **resource shortcuts**
 
-You continue to call `Tims\Shiprocket\ShiprocketClient` / `Tims\Shiprocket\Api\...`; this package configures and supports them in Laravel.
+Call the API with one-liners — no manual token plumbing:
+
+```php
+Shiprocket::orders()->list(['page' => 1]);
+Shiprocket::couriers()->serviceability([...]);
+Shiprocket::withCredential('second')->warehouse()->srfServiceability([...]);
+```
 
 ## Requirements
 
 - PHP 8.3+
 - Laravel 10, 11, or 12
-- `tims/shiprocket-php-sdk` ^1.0
+- `tims/shiprocket-php-sdk` ^1.1
 
 ## Installation
 
@@ -39,6 +45,11 @@ Add these to your `.env`:
 SHIPROCKET_EMAIL=
 SHIPROCKET_PASSWORD=
 
+# Optional: named multi-account pair
+# SHIPROCKET_DEFAULT_CREDENTIALS=default
+# SHIPROCKET_SECOND_EMAIL=
+# SHIPROCKET_SECOND_PASSWORD=
+
 # Optional overrides
 SHIPROCKET_BASE_URL=https://apiv2.shiprocket.in
 
@@ -58,50 +69,90 @@ SHIPROCKET_HTTP_TIMEOUT=60
 
 Create an API user in Shiprocket: **Settings → API → Configure → Create an API User**. Use that email/password (not your panel login).
 
+### Multi-account credentials
+
+`config/shiprocket.php`:
+
+```php
+'default_credentials' => env('SHIPROCKET_DEFAULT_CREDENTIALS', 'default'),
+
+'credentials' => [
+    'default' => [
+        'email' => env('SHIPROCKET_EMAIL'),
+        'password' => env('SHIPROCKET_PASSWORD'),
+    ],
+    'second' => [
+        'email' => env('SHIPROCKET_SECOND_EMAIL'),
+        'password' => env('SHIPROCKET_SECOND_PASSWORD'),
+    ],
+],
+```
+
+```php
+Shiprocket::withCredential('second')->orders()->list();
+```
+
+Each credential name gets its own token-cache namespace.
+
 ## Usage
 
-Type-hint `ShiprocketManager` or use the facade:
+### Facade shortcuts (recommended)
 
 ```php
 use Tims\LaravelShiprocket\Facades\Shiprocket;
+
+$rates = Shiprocket::couriers()->serviceability([
+    'pickup_postcode' => '110030',
+    'delivery_postcode' => '122001',
+    'weight' => 0.5,
+    'cod' => 0,
+]);
+
+$orders = Shiprocket::orders()->list(['page' => 1]);
+
+$srf = Shiprocket::warehouse()->srfServiceability([
+    'postcode' => '110030',
+    'sku' => 'SKU-1',
+    'quantity' => 1,
+]);
+```
+
+### Type-hint the manager
+
+```php
 use Tims\LaravelShiprocket\ShiprocketManager;
-use Tims\Shiprocket\Api\OrdersApi;
 
 public function index(ShiprocketManager $shiprocket)
 {
-    $client = $shiprocket->client();
-
-    $rates = $client->couriers()->serviceability([
-        'pickup_postcode' => '110030',
-        'delivery_postcode' => '122001',
-        'weight' => 0.5,
-        'cod' => 0,
-    ]);
-
-    return response()->json($rates);
+    return $shiprocket->orders()->list(['page' => 1]);
 }
-
-// Or build an SDK API class directly:
-$api = Shiprocket::make(OrdersApi::class);
-$result = $api->list(['page' => 1]);
 ```
 
-You can also resolve `Tims\Shiprocket\ShiprocketClient` and `Tims\Shiprocket\ApiClient` from the container.
+### Explicit client / make
 
-SDK resource helpers available via `$shiprocket->client()`:
+```php
+use Tims\Shiprocket\Api\OrdersApi;
 
-`auth`, `orders`, `couriers`, `shipments`, `pickup`, `products`, `inventory`, `listings`, `channels`, `account`, `ndr`, `imports`, `international`
+$client = Shiprocket::client();
+$api = Shiprocket::make(OrdersApi::class);
+$token = Shiprocket::getToken();
+```
+
+SDK resource helpers (facade or `$manager->…()` / `$manager->client()->…()`):
+
+`auth`, `orders`, `couriers`, `shipments`, `pickup`, `products`, `inventory`, `listings`, `channels`, `account`, `ndr`, `imports`, `international`, `warehouse`
 
 See the [`tims/shiprocket-php-sdk` README](https://github.com/timslabs/shiprocket-php-sdk) for full endpoint coverage.
 
 ## Token cache
 
-Tokens are cached under a key derived from the API user email. To force a fresh login:
+Tokens are cached under a key derived from the API user email and credential name. To force a fresh login:
 
 ```php
 use Tims\LaravelShiprocket\Facades\Shiprocket;
 
 Shiprocket::forgetToken();
+Shiprocket::withCredential('second')->forgetToken();
 ```
 
 ## Webhooks

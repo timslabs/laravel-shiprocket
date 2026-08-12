@@ -3,11 +3,47 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | Default Credential
+    |--------------------------------------------------------------------------
+    |
+    | Key from the credentials map below used when none is selected via
+    | Shiprocket::withCredential(...).
+    |
+    */
+
+    'default_credentials' => env('SHIPROCKET_DEFAULT_CREDENTIALS', 'default'),
+
+    /*
+    |--------------------------------------------------------------------------
     | API Credentials
     |--------------------------------------------------------------------------
     |
     | Create an API user in Shiprocket: Settings → API → Configure.
     | Use that email and password here (not your panel login).
+    |
+    | Add more named pairs for multi-account setups, then switch with:
+    | Shiprocket::withCredential('second')->orders()->list();
+    |
+    */
+
+    'credentials' => [
+        'default' => [
+            'email' => env('SHIPROCKET_EMAIL'),
+            'password' => env('SHIPROCKET_PASSWORD'),
+        ],
+        // 'second' => [
+        //     'email' => env('SHIPROCKET_SECOND_EMAIL'),
+        //     'password' => env('SHIPROCKET_SECOND_PASSWORD'),
+        // ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Legacy top-level credentials (optional)
+    |--------------------------------------------------------------------------
+    |
+    | Still supported for backward compatibility. Prefer `credentials` above.
+    | Used as a fallback when `credentials.default` is empty.
     |
     */
 
@@ -30,7 +66,8 @@ return [
     |
     | Shiprocket JWTs are valid for 10 days (240 hours). Tokens are cached in
     | Laravel's default cache store. TTL uses the documented lifetime minus a
-    | safety buffer unless overridden.
+    | safety buffer unless overridden. Each credential name gets its own cache
+    | namespace.
     |
     */
 
