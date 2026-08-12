@@ -1,0 +1,71 @@
+{
+    "name": "tims/laravel-shiprocket",
+    "description": "Laravel integration for the Shiprocket PHP SDK (tims/shiprocket-php-sdk)",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "shiprocket",
+        "shipping",
+        "ecommerce",
+        "logistics",
+        "sdk"
+    ],
+    "authors": [
+        {
+            "name": "TIMS",
+            "homepage": "https://github.com/timslabs"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../shiprocket-php-sdk",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "guzzlehttp/guzzle": "^7.9",
+        "illuminate/cache": "^10.0|^11.0|^12.0",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "tims/shiprocket-php-sdk": "^1.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^8.0|^9.0|^10.0",
+        "phpunit/phpunit": "^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tims\\LaravelShiprocket\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tims\\LaravelShiprocket\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "lint": "vendor/bin/pint --test",
+        "lint:fix": "vendor/bin/pint",
+        "test": "vendor/bin/phpunit --configuration phpunit.xml"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Tims\\LaravelShiprocket\\ShiprocketServiceProvider"
+            ],
+            "aliases": {
+                "Shiprocket": "Tims\\LaravelShiprocket\\Facades\\Shiprocket"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true
+    }
+}
